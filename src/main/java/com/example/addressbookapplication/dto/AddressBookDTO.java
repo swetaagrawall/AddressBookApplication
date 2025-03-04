@@ -1,5 +1,4 @@
 package com.example.addressbookapplication.dto;
-
 public class AddressBookDTO {
     private String name;
     private String phone;
