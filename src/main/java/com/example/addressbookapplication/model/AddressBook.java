@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+
 @Entity
 @JsonPropertyOrder({"id", "name", "phone", "email"})
 public class AddressBook {
@@ -19,7 +20,8 @@ public class AddressBook {
     private String phone;
     private String email;
 
-    public AddressBook(String name, String phone, String email) {
+    public AddressBook(Long id,String name, String phone, String email) {
+        this.id=id;
         this.name = name;
         this.phone = phone;
         this.email = email;
