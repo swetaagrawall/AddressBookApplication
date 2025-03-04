@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Optional;
+
 @RestController
 @Slf4j
 @RequestMapping("/addressbook")
@@ -24,20 +26,20 @@ public class AddressBookController {
     // GET All Contacts
     @GetMapping
     public ResponseEntity<List<AddressBook>> getAllContacts() {
-        log.info("GET /addressbook - Fetching all contacts");
-        return ResponseEntity.ok(addressBookService.getAllContacts());
+        log.info("GET /addressbook - Fetching all contacts from DB");
+        List<AddressBook> contacts = addressBookService.getAllContacts();
+        return ResponseEntity.ok(contacts);
     }
 
     // GET Contact By ID
     @GetMapping("/{id}")
     public ResponseEntity<AddressBook> getContactById(@PathVariable Long id) {
-        log.info("GET /addressbook/{} - Fetching contact", id);
-        AddressBook contact = addressBookService.getContactById(id);
-        if (contact != null) {
-            log.info("Contact found: {}", contact);
-            return ResponseEntity.ok(contact);
+        log.info("GET /addressbook/{} - Fetching contact from DB", id);
+        Optional<AddressBook> contactOptional = addressBookService.getContactById(id);
+        if (contactOptional.isPresent()) {
+            return ResponseEntity.ok(contactOptional.get());
         } else {
-            log.warn("Contact with ID {} not found", id);
+            log.warn("Contact with ID {} not found in DB", id);
             return ResponseEntity.notFound().build();
         }
     }
@@ -45,7 +47,7 @@ public class AddressBookController {
     // POST Add New Contact
     @PostMapping
     public ResponseEntity<AddressBook> addContact(@RequestBody AddressBookDTO dto) {
-        log.info("POST /addressbook - Adding new contact: {}", dto);
+        log.info("POST /addressbook - Adding new contact to DB: {}", dto);
         AddressBook newContact = addressBookService.addContact(dto);
         log.info("New contact added successfully: {}", newContact);
         return ResponseEntity.ok(newContact);
@@ -54,13 +56,12 @@ public class AddressBookController {
     // PUT Update Contact By ID
     @PutMapping("/{id}")
     public ResponseEntity<AddressBook> updateContact(@PathVariable Long id, @RequestBody AddressBookDTO dto) {
-        log.info("PUT /addressbook/{} - Updating contact: {}", id, dto);
-        AddressBook updatedContact = addressBookService.updateContact(id, dto);
-        if (updatedContact != null) {
-            log.info("Contact updated successfully: {}", updatedContact);
-            return ResponseEntity.ok(updatedContact);
+        log.info("PUT /addressbook/{} - Updating contact in DB: {}", id, dto);
+        Optional<AddressBook> updatedContactOptional = addressBookService.updateContact(id, dto);
+        if (updatedContactOptional.isPresent()) {
+            return ResponseEntity.ok(updatedContactOptional.get());
         } else {
-            log.warn("Update failed - Contact with ID {} not found", id);
+            log.warn("Update failed - Contact with ID {} not found in DB", id);
             return ResponseEntity.notFound().build();
         }
     }
@@ -70,10 +71,10 @@ public class AddressBookController {
     public ResponseEntity<String> deleteContact(@PathVariable Long id) {
         boolean deleted = addressBookService.deleteContact(id);
         if (deleted) {
-            log.info("Contact with ID {} deleted successfully", id);
+            log.info("Contact with ID {} deleted successfully from DB", id);
             return ResponseEntity.ok("Deleted Successfully");
         } else {
-            log.warn("Delete failed - Contact with ID {} not found", id);
+            log.warn("Delete failed - Contact with ID {} not found in DB", id);
             return ResponseEntity.notFound().build();
         }
     }
