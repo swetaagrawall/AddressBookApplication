@@ -5,13 +5,15 @@ import com.example.addressbookapplication.model.AddressBook;
 import com.example.addressbookapplication.repository.AddressBookRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Slf4j
+@Validated
 public class AddressBookService {
 
     private final AddressBookRepository addressBookRepository;
@@ -29,29 +31,22 @@ public class AddressBookService {
     // Get Contact By ID
     public Optional<AddressBook> getContactById(Long id) {
         log.info("Fetching contact with ID: {}", id);
-        Optional<AddressBook> contact = addressBookRepository.findById(id);
-        if (contact.isPresent()) {
-            log.info("Contact found: {}", contact.get());
-        } else {
-            log.warn("Contact with ID {} not found", id);
-        }
-        return contact;
+        return addressBookRepository.findById(id);
     }
 
-    // Add New Contact
-    public AddressBook addContact(AddressBookDTO dto) {
+    // Add New Contact with Validation
+    public AddressBook addContact(@Valid AddressBookDTO dto) {
+        log.info("Adding new contact: {}", dto);
         AddressBook contact = new AddressBook();
         contact.setName(dto.getName());
         contact.setPhone(dto.getPhone());
         contact.setEmail(dto.getEmail());
 
-        AddressBook savedContact = addressBookRepository.save(contact);
-        log.info("New contact added: {}", savedContact);
-        return savedContact;
+        return addressBookRepository.save(contact);
     }
 
-    // Update Contact By ID
-    public Optional<AddressBook> updateContact(Long id, AddressBookDTO dto) {
+    // Update Contact By ID with Validation
+    public Optional<AddressBook> updateContact(Long id, @Valid AddressBookDTO dto) {
         log.info("Updating contact with ID: {}", id);
         Optional<AddressBook> contactOptional = addressBookRepository.findById(id);
 
@@ -61,9 +56,7 @@ public class AddressBookService {
             contact.setPhone(dto.getPhone());
             contact.setEmail(dto.getEmail());
 
-            AddressBook updatedContact = addressBookRepository.save(contact);
-            log.info("Updated contact: {}", updatedContact);
-            return Optional.of(updatedContact);
+            return Optional.of(addressBookRepository.save(contact));
         } else {
             log.warn("Update failed - Contact with ID {} not found", id);
             return Optional.empty();
@@ -73,9 +66,7 @@ public class AddressBookService {
     // Delete Contact By ID
     public boolean deleteContact(Long id) {
         log.info("Deleting contact with ID: {}", id);
-        Optional<AddressBook> contactOptional = addressBookRepository.findById(id);
-
-        if (contactOptional.isPresent()) {
+        if (addressBookRepository.existsById(id)) {
             addressBookRepository.deleteById(id);
             log.info("Contact with ID {} deleted successfully", id);
             return true;
